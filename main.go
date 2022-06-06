@@ -14,7 +14,7 @@ import (
 
 var (
 	qConf = &quic.Config{
-		ConnectionIDLength:             0, // 4 byte(s) — 0 byte for a client, 4-18 byte(s) for a server
+		ConnectionIDLength:             4, // 4 byte(s) — 0 byte for a client, 4-18 byte(s) for a server
 		HandshakeIdleTimeout:           10 * time.Second,
 		MaxIdleTimeout:                 90 * time.Second,
 		MaxIncomingStreams:             10000,
@@ -37,9 +37,9 @@ var (
 		DisableCompression:     false,
 		ForceAttemptHTTP2:      false,
 		TLSClientConfig:        tlsConf,
-		TLSHandshakeTimeout:    30 * time.Second,
-		ResponseHeaderTimeout:  30 * time.Second,
-		IdleConnTimeout:        90 * time.Second,
+		TLSHandshakeTimeout:    timeoutTr,
+		ResponseHeaderTimeout:  timeoutTr,
+		IdleConnTimeout:        timeoutTr,
 		ExpectContinueTimeout:  1 * time.Second,
 		MaxIdleConns:           1000,     // Prevents resource exhaustion
 		MaxIdleConnsPerHost:    100,      // Increases performance and prevents resource exhaustion
@@ -66,7 +66,7 @@ var (
 	})
 
 	hostPort  = "7777"
-	timeoutTr = 90 * time.Second
+	timeoutTr = 30 * time.Second
 )
 
 func main() {
