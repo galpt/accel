@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -63,6 +64,9 @@ var (
 	h3RoundTripper = goproxy.RoundTripperFunc(func(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Response, error) {
 		return h3Tr.RoundTrip(ctx.Req)
 	})
+
+	hostPort  = "7777"
+	timeoutTr = 90 * time.Second
 )
 
 func main() {
@@ -84,7 +88,23 @@ func main() {
 			return resp
 		})
 
-	log.Fatal(http.ListenAndServe(":7777", proxy))
+	// HTTP proxy server
+	httpserver := &http.Server{
+		Addr:              fmt.Sprintf(":%v", hostPort),
+		Handler:           proxy,
+		TLSConfig:         tlsConf,
+		MaxHeaderBytes:    64 << 10, // 64k
+		ReadTimeout:       timeoutTr,
+		ReadHeaderTimeout: timeoutTr,
+		WriteTimeout:      timeoutTr,
+		IdleTimeout:       timeoutTr,
+	}
+	httpserver.SetKeepAlivesEnabled(true)
+
+	fmt.Println()
+	fmt.Println(fmt.Sprintf("[Accel] HTTP proxy is running on %v", fmt.Sprintf(":%v", hostPort)))
+	fmt.Println()
+	log.Fatal(httpserver.ListenAndServe())
 }
 
 // =========================================
